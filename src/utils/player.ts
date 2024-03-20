@@ -4,21 +4,21 @@ export interface IPlayer {
   laptop: string;
   balance: number;
   network: string;
-  lastHack?: Date | null;
+  lastHack?: string;
 }
 export class Player implements IPlayer {
   nick: string;
   laptop: string;
   balance: number;
   network: string;
-  lastHack?: Date | null;
+  lastHack?: string;
   pathStats: string;
   constructor(
     nick: string,
     balance: number,
     laptop: string,
     network: string,
-    lastHack: Date | null = null
+    lastHack: string = ""
   ) {
     this.nick = nick;
     this.balance = balance;
@@ -26,6 +26,16 @@ export class Player implements IPlayer {
     this.network = network;
     this.lastHack = lastHack;
     this.pathStats = process.cwd() + "/stats/player.json";
+  }
+  updateStats(key: string, val: unknown) {
+    // @ts-ignore
+    if (!this[key]) {
+      throw new Error(`Error: stats[${key}] is undefined`);
+    }
+    // @ts-ignore
+    this[key] = val;
+    console.log(this);
+    this.save();
   }
   static checkPlayer() {
     return fse.existsSync(process.cwd() + "/stats/player.json");

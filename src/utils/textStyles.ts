@@ -17,13 +17,16 @@ export const Answer = (str: string) => {
 export const ClearCli = (): void => {
   console.clear();
 };
-export async function Loading(): Promise<string> {
+export const errorMsg = (str: string): void => {
+  return write(Colors.bold.red(str));
+};
+export async function Loading(time = 50): Promise<string> {
   return new Promise(async (res) => {
     let percent = 0;
     let line = "______________________________";
     const totalSymbols = 30;
     while (true) {
-      await new Promise((res) => setTimeout(res, 50));
+      await new Promise((res) => setTimeout(res, time));
       percent++;
       const completedSymbols = Math.floor((percent / 100) * totalSymbols);
       const remainingSymbols = totalSymbols - completedSymbols;
