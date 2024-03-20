@@ -1,0 +1,16 @@
+export const domains = [
+  ".com",
+  ".orion",
+  ".eu",
+  ".orion",
+  ".io",
+  ".gold",
+  ".silver",
+  ".ua",
+  ".us",
+  ".money",
+  ".gov",
+  ".bank",
+  ".org",
+  ".net",
+];

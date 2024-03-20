@@ -1,0 +1,30 @@
+{
+  "name": "hacker-game",
+  "version": "1.0.0",
+  "description": "The simple cli game",
+  "main": "dist/game.js",
+  "type": "commonjs",
+  "scripts": {
+    "start:dev": "ts-node-dev src/*.ts",
+    "build": "tsc"
+  },
+  "keywords": [
+    "game",
+    "hacker-game",
+    "cli"
+  ],
+  "author": "CodeVisionEvgen",
+  "license": "ISC",
+  "dependencies": {
+    "cli-color": "^2.0.4",
+    "fs-extra": "^11.2.0",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/cli-color": "^2.0.6",
+    "@types/fs-extra": "^11.0.4",
+    "@types/readline-sync": "^1.4.8",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.2"
+  }
+}
