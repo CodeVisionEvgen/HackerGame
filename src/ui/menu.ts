@@ -1,4 +1,4 @@
-import { IPlayer } from "../utils/player";
+import { IPlayer } from "../modules/player";
 import { Answer, ClearCli, pressBToBack, write } from "../utils/textStyles";
 import * as fse from "fs-extra";
 import * as Colors from "cli-color";

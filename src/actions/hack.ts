@@ -2,10 +2,9 @@ import { HackDescription } from "../constants/actionsDesc";
 import * as ReadLine from "readline-sync";
 import { RenderMenu } from "../ui/menu";
 import * as Colors from "cli-color";
-import { Player } from "../utils/player";
+import { Player } from "../modules/player";
 import { ClearCli, Loading, errorMsg, write } from "../utils/textStyles";
-import * as crypto from "crypto";
-import { domains } from "../constants/hack";
+import { Urls } from "../modules/urls";
 
 export type CmdType = {
   [key: string]: {
@@ -13,29 +12,30 @@ export type CmdType = {
   };
 };
 
-const genUrls = (count: number = 10) => {
-  const result: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const random = crypto.generateKeySync("hmac", {
-      length: 150 + Math.abs(+(Math.random() * 100).toFixed(0)),
-    });
-    result.push(
-      (+Math.abs(Math.random() * 10).toFixed(0) % 2 ? "https://" : "http://") +
-        random.export().toString("hex") +
-        domains[Math.floor(Math.random() * domains.length)].domain
-    );
-  }
-  return result;
-};
-
 const cmds: CmdType = {
   findUrls: {
     action: async () => {
-      const urls = genUrls();
-      await Loading(10);
-      urls.forEach((url) => {
-        write(url + "\n");
-      });
+      const Url = new Urls();
+      if (Url.checkSizeUrls()) {
+        write(`Your have cache ${Url.checkSizeUrls()} urls.\n`);
+        Url.genUrls().urls.forEach((url) => {
+          write(url + "\n");
+        });
+      } else {
+        await Loading(10);
+        Url.genUrls().urls.forEach((url) => {
+          write(url + "\n");
+        });
+      }
+      renderTerminal();
+    },
+  },
+  dropUrls: {
+    action: async () => {
+      const Url = new Urls();
+      await Loading(1);
+      Url.dropUrls();
+      write(`Your droped ${Url.checkSizeUrls()} urls.\n`);
       renderTerminal();
     },
   },
@@ -61,12 +61,23 @@ const cmds: CmdType = {
         `Response from: ${arg} save in lastResponse.txt\nTry 'cat lastResponse.txt' to see response.\n`
       );
       const stats = Player.readStats();
+      const code = [200, 401][Math.floor(Math.random() * 2)];
       const player = new Player(
         stats.nick,
         stats.balance,
         stats.laptop,
         stats.network,
-        arg
+        {
+          domain: arg,
+          code,
+          data: (() => {
+            if (code === 401) {
+              return "401 Unauthorized";
+            } else {
+              return "password: 123123";
+            }
+          })(),
+        }
       );
       player.save();
       renderTerminal();
@@ -94,9 +105,28 @@ const cmds: CmdType = {
         // stats.lastHack.match()
         // }
         // else
-        write(stats.lastHack + "\n");
+        write(JSON.stringify(stats.lastHack) + "\n");
       }
       renderTerminal();
+    },
+  },
+  scanPort: {
+    action: (question: string) => {
+      const arg = question.split(" ")[1];
+      if (!arg) {
+        errorMsg("Syntax error: scanPort command must have an argument!\n");
+        renderTerminal();
+        return () => false;
+      }
+      if (
+        !(arg.includes("http://") || arg.includes("https://")) &&
+        !arg.match(/\.[A-za-z]*/g)?.length
+      ) {
+        errorMsg("Syntax error: scanPort argument is not url!\n");
+        renderTerminal();
+        return () => false;
+      }
+      RenderMenu();
     },
   },
   exit: {

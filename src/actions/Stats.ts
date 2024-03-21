@@ -1,7 +1,7 @@
 import { StatsDescription } from "../constants/actionsDesc";
 import { StatsAction } from "../constants/actions";
 import { RenderMenu } from "../ui/menu";
-import { Player } from "../utils/player";
+import { Player } from "../modules/player";
 import { ClearCli, pressBToBack, write } from "../utils/textStyles";
 
 export default {

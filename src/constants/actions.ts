@@ -1,4 +1,4 @@
-import { IPlayer } from "../utils/player";
+import { IPlayer } from "../modules/player";
 
 export const HelpAction = `findUrls: Use this command to search URLs.
 Upon execution, you will receive a list of all URLs found on the web.
