@@ -19,12 +19,12 @@ const cmds: CmdType = {
       if (Url.checkSizeUrls()) {
         write(`Your have cache ${Url.checkSizeUrls()} urls.\n`);
         Url.genUrls().urls.forEach((url) => {
-          write(url + "\n");
+          write(url.url + "\n");
         });
       } else {
         await Loading(10);
         Url.genUrls().urls.forEach((url) => {
-          write(url + "\n");
+          write(url.url + "\n");
         });
       }
       renderTerminal();
@@ -39,11 +39,11 @@ const cmds: CmdType = {
       renderTerminal();
     },
   },
-  curl: {
+  checker: {
     action: async (question) => {
       const arg = question.split(" ")[1];
       if (!arg) {
-        errorMsg("Syntax error: curl command must have an argument!\n");
+        errorMsg("Syntax error: checker command must have an argument!\n");
         renderTerminal();
         return false;
       }
@@ -51,7 +51,15 @@ const cmds: CmdType = {
         !(arg.includes("http://") || arg.includes("https://")) &&
         !arg.match(/\.[A-za-z]*/g)?.length
       ) {
-        errorMsg("Syntax error: curl argument is not url!\n");
+        errorMsg("Syntax error: checker argument is not url!\n");
+        renderTerminal();
+        return false;
+      }
+      const Url = new Urls();
+      const { urls } = Url.genUrls();
+      const urlIsExist = urls.filter(({ url }) => url === arg)[0];
+      if (!urlIsExist) {
+        errorMsg("Fatal error: url not exists!\n");
         renderTerminal();
         return false;
       }
@@ -70,11 +78,12 @@ const cmds: CmdType = {
         {
           domain: arg,
           code,
-          data: (() => {
+          ip: (() => {
+            Url.deleteUrl(arg);
             if (code === 401) {
-              return "401 Unauthorized";
+              return "Checker failed";
             } else {
-              return "password: 123123";
+              return urlIsExist.ip;
             }
           })(),
         }

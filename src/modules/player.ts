@@ -2,7 +2,7 @@ import { setNickname } from "../constants/questions";
 import { Answer } from "../utils/textStyles";
 import * as Colors from "cli-color";
 import * as fse from "fs-extra";
-export type LastHackType = { domain: string; code: number; data: string };
+export type LastHackType = { domain: string; code: number; ip: string };
 export interface IPlayer {
   nick: string;
   laptop: string;
@@ -25,7 +25,7 @@ export class Player implements IPlayer {
     lastHack: LastHackType = {
       domain: "none",
       code: NaN,
-      data: "none",
+      ip: "none",
     }
   ) {
     this.nick = nick;
