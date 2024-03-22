@@ -20,6 +20,11 @@ export const ClearCli = (): void => {
 export const errorMsg = (str: string): void => {
   return write(Colors.bold.red(str));
 };
+export function StrictSize(text: string, size: number = 100) {
+  if (text.length !== size) {
+    return text + " ".repeat(size - text.length);
+  } else return text;
+}
 export async function Loading(time = 50): Promise<string> {
   return new Promise(async (res) => {
     let percent = 0;

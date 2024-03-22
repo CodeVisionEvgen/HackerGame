@@ -3,3 +3,4 @@ export const StatsDescription = `The player's statistics\n\r`;
 export const ExitDescription = `Exit from game\n\r`;
 export const HackDescription = `Try to hack website\n\r`;
 export const HelpDescription = `Help for hacking\n\r`;
+export const DarkWebDescription = `Use for selling illegal items\n`;
