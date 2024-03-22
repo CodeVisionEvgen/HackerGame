@@ -1,10 +1,13 @@
 import * as crypto from "crypto";
 import * as fse from "fs-extra";
+import { uniqueNamesGenerator, starWars, colors } from "unique-names-generator";
 import { domains } from "../constants/hack";
 export type UrlType = {
   url: string;
   ip: string;
+  successPort: number;
   ports: number[];
+  adminNick: string;
   attempts: number;
   impressibility: boolean;
 };
@@ -63,7 +66,7 @@ export class Urls {
       fse.removeSync(this.pathUrls);
     }
   };
-  readUrls = (): null | UrlsType[] => {
+  readUrls = (): null | UrlsType => {
     if (fse.existsSync(this.pathUrls)) return fse.readJsonSync(this.pathUrls);
     else return null;
   };
@@ -93,9 +96,15 @@ export class Urls {
             random.export().toString("hex") +
             domains[Math.floor(Math.random() * domains.length)].domain,
           ip: this.genIp(),
+          successPort: ports[Math.floor(Math.random() * ports.length)],
           ports: ports,
           attempts: 3,
           impressibility: false,
+          adminNick: uniqueNamesGenerator({
+            separator: "-",
+            style: "capital",
+            dictionaries: [colors, starWars],
+          }).replace(/ /g, "-"),
         });
       }
       this.urlObj = result;

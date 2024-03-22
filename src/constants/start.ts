@@ -4,4 +4,4 @@ As a tech-savvy infiltrator, you'll navigate the darknet, breach secure servers,
 But beware, for every move you make is shadowed by rival hackers, government agencies, and corporate security teams.
 Will you rise to become an infamous cybercriminal, feared and revered by all?
 Or will you use your skills for the greater good, exposing corruption and fighting for justice in the digital age?
-The choices are yours to make, and the consequences are yours to bear. Welcome to the world of hacking – proceed with caution.\n\r`;
+The choices are yours to make, and the consequences are yours to bear.\nWelcome to the world of hacking – proceed with caution.\n`;

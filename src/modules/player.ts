@@ -8,14 +8,18 @@ export interface IPlayer {
   laptop: string;
   balance: number;
   network: string;
+  location: string;
   lastHack?: LastHackType;
+  dbs: string[];
 }
 export class Player implements IPlayer {
   nick: string;
   laptop: string;
   balance: number;
   network: string;
+  location: string;
   lastHack?: LastHackType;
+  dbs: string[];
   pathStats: string;
   constructor(
     nick: string,
@@ -26,23 +30,37 @@ export class Player implements IPlayer {
       domain: "none",
       code: NaN,
       ip: "none",
-    }
+    },
+    location: string = "~/",
+    dbs: string[] = []
   ) {
     this.nick = nick;
     this.balance = balance;
     this.laptop = laptop;
     this.network = network;
     this.lastHack = lastHack;
+    this.location = location;
+    this.dbs = dbs;
     this.pathStats = process.cwd() + "/data/player.json";
   }
-  updateStats(key: string, val: unknown) {
-    // @ts-ignore
-    if (!this[key]) {
-      throw new Error(`Error: stats[${key}] is undefined`);
-    }
-    // @ts-ignore
-    this[key] = val;
-    this.save();
+  // updateStats(key: string, val: unknown) {
+  //   // @ts-ignore
+  //   if (!this[key]) {
+  //     throw new Error(`Error: stats[${key}] is undefined`);
+  //   }
+  //   // @ts-ignore
+  //   this[key] = val;
+  //   console.log(this);
+  //   this.save();
+  // }
+  static isDefaultLocation() {
+    return (
+      (
+        JSON.parse(
+          fse.readFileSync(process.cwd() + "/data/player.json").toString("utf8")
+        ) as IPlayer
+      ).location === "~/"
+    );
   }
 
   static setNick = () => {
@@ -77,6 +95,8 @@ export class Player implements IPlayer {
         laptop: this.laptop,
         network: this.network,
         lastHack: this.lastHack,
+        location: this.location,
+        dbs: this.dbs,
       })
     );
   }

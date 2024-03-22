@@ -18,7 +18,8 @@
   "dependencies": {
     "cli-color": "^2.0.4",
     "fs-extra": "^11.2.0",
-    "readline-sync": "^1.4.10"
+    "readline-sync": "^1.4.10",
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
     "@types/cli-color": "^2.0.6",

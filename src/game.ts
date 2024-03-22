@@ -8,7 +8,14 @@ async function main() {
   if (!Player.checkPlayer()) {
     await Greeting();
     const nick = Player.setNick();
-    const player = new Player(nick, 0, "Dell-Latitude-E6400", "2G");
+    const player = new Player(
+      nick,
+      0,
+      "Dell-Latitude-E6400",
+      "2G",
+      undefined,
+      "/"
+    );
     player.save();
   }
   RenderMenu();

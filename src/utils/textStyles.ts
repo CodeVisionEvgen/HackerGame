@@ -4,7 +4,7 @@ import * as Colors from "cli-color";
 export const LazyText = async (str: string, time = 10): Promise<void> => {
   return new Promise((res) => {
     let i = 0;
-    str = str.replace(/\. /g, ". \n\r");
+    // str = str.replace(/\. /g, ". \n\r");
     const printInterval = setInterval(() => {
       process.stdin.write(str[i++] || "\n\r");
       if (i == str.length) res(clearInterval(printInterval));
@@ -34,7 +34,7 @@ export async function Loading(time = 50): Promise<string> {
       process.stdout.write(`\r${line} (${percent}%)`);
       if (percent === 100) {
         process.stdout.write("\n");
-        res(`\r${line} (${percent}%)`);
+        res(`${line} (${percent}%)`);
         break;
       }
     }

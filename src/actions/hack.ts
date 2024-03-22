@@ -1,20 +1,35 @@
 import { HackDescription } from "../constants/actionsDesc";
-import * as ReadLine from "readline-sync";
 import * as mainLine from "readline";
 import { RenderMenu } from "../ui/menu";
 import * as Colors from "cli-color";
 import { Player } from "../modules/player";
 import { ClearCli, Loading, errorMsg, write } from "../utils/textStyles";
-import { FieldsUrlType, UrlType, Urls, UrlsType } from "../modules/urls";
+import { Urls } from "../modules/urls";
 
 export type CmdType = {
   [key: string]: {
     action: (question: string) => unknown;
+    middleware?: (arg?: unknown) => unknown;
   };
+};
+
+const middlewares = {
+  isDefLocation: (): boolean => {
+    return Player.isDefaultLocation();
+  },
+  setPrompt: (line: mainLine.Interface) => {
+    let player = Player.readStats();
+    line.setPrompt(
+      Colors.bold.greenBright(`${player.nick}@${player.laptop}`) +
+        `:${Colors.bold.blue(`${player.location}`)}$ `
+    );
+    line.prompt();
+  },
 };
 
 const cmds: CmdType = {
   findUrls: {
+    middleware: middlewares.isDefLocation,
     action: async () => {
       const Url = new Urls();
       if (Url.checkSizeUrls()) {
@@ -148,7 +163,6 @@ const cmds: CmdType = {
   cat: {
     action: (question) => {
       const arg = question.split(" ")[1];
-      // const operation = question.split(/\|/)[1];
       if (!arg) {
         errorMsg("Syntax error: cat command must have an argument!\n");
         return false;
@@ -161,12 +175,86 @@ const cmds: CmdType = {
       if (!stats.lastHack) {
         write(`File ${arg} is empty.\n`);
       } else {
-        // if(operation.includes('grep')) {
-        // stats.lastHack.match()
-        // }
-        // else
         write(JSON.stringify(stats.lastHack) + "\n");
       }
+    },
+  },
+  coverTracks: {
+    action: async () => {
+      ClearCli();
+      const stats = Player.readStats();
+      if (stats.location !== "~/") {
+        write("Start coverTracks\n");
+        await Loading(30);
+        write(`Covering tracks\n`);
+        await Loading(80);
+        write(`Cover-up complete\n`);
+        new Player(
+          stats.nick,
+          stats.balance,
+          stats.laptop,
+          stats.network,
+          stats.lastHack,
+          "~/",
+          stats.dbs
+        ).save();
+      } else {
+        errorMsg("Cover-up unnecessary\n");
+        return false;
+      }
+    },
+  },
+  downloadDB: {
+    action: async () => {
+      const stats = Player.readStats();
+      if (stats.location !== "~/") {
+        write("Start download...\n");
+        await Loading(80);
+        write("Download finish\n");
+        new Player(
+          stats.nick,
+          stats.balance,
+          stats.laptop,
+          stats.network,
+          stats.lastHack,
+          stats.location,
+          [...stats.dbs, stats.location]
+        ).save();
+      } else {
+        errorMsg("Fatal error: Database not found.\n");
+        return false;
+      }
+    },
+  },
+  bruteForce: {
+    action: async (question: string) => {
+      const arg = question.split(" ")[1];
+      if (!arg) {
+        errorMsg("Syntax error: bruteForce command must have an argument!\n");
+        return false;
+      }
+      const Url = new Urls();
+      const { urls } = Url.readUrls();
+      const currentUrl = urls.filter(({ adminNick }) => arg === adminNick)[0];
+      if (!currentUrl) {
+        errorMsg(`Fatal error: ${arg} is not exists!\n`);
+        return false;
+      }
+      if (!currentUrl.impressibility) {
+        errorMsg(`Fatal error: ${currentUrl.url} is not impressibility!\n`);
+        return false;
+      }
+      await Loading(50);
+      const stats = Player.readStats();
+      const player = new Player(
+        stats.nick,
+        stats.balance,
+        stats.laptop,
+        stats.network,
+        stats.lastHack,
+        currentUrl.url
+      );
+      player.save();
     },
   },
   scanPort: {
@@ -203,31 +291,27 @@ export default {
 };
 
 function renderTerminal() {
-  const player = Player.readStats();
   const line = mainLine.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  line.setPrompt(
-    Colors.bold.greenBright(`${player.nick}@${player.laptop}`) +
-      `:${Colors.blue("~")}$ `
-  );
-  line.prompt();
-  // let question = ReadLine.prompt({
-  //   prompt:
-  //     Colors.bold.greenBright(`${player.nick}@${player.laptop}`) +
-  //     `:${Colors.blue("~")}$ `,
-  // });
+  middlewares.setPrompt(line);
   line.on("line", async (question) => {
     if (!cmds[question.split(" ")[0]]) {
-      errorMsg(`Command '${question}' not found!\n\r`);
-      line.prompt();
+      errorMsg(`Command '${question}' not found!\n`);
+      middlewares.setPrompt(line);
     } else if (question === "exit") {
       cmds[question.split(" ")[0]].action(question);
       line.close();
     } else {
-      await cmds[question.split(" ")[0]].action(question);
-      line.prompt();
+      const cmd = cmds[question.split(" ")[0]];
+      if (cmd.middleware && !cmd.middleware()) {
+        errorMsg(`Command '${question}' not found!\n`);
+        middlewares.setPrompt(line);
+      } else {
+        await cmd.action(question);
+        middlewares.setPrompt(line);
+      }
     }
   });
 }
