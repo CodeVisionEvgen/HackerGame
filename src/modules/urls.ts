@@ -1,13 +1,22 @@
 import * as crypto from "crypto";
 import * as fse from "fs-extra";
 import { domains } from "../constants/hack";
-export type UrlsType = {
-  urls: {
-    url: string;
-    ip: string;
-    ports: number[];
-  }[];
+export type UrlType = {
+  url: string;
+  ip: string;
+  ports: number[];
+  attempts: number;
+  impressibility: boolean;
 };
+export type UrlsType = {
+  urls: UrlType[];
+};
+export type FieldsUrlType =
+  | "url"
+  | "ip"
+  | "ports"
+  | "attempts"
+  | "impressibility";
 
 export class Urls {
   pathUrls: "data/urls.json";
@@ -22,12 +31,25 @@ export class Urls {
     const a = () => Math.floor(Math.random() * 255);
     return `${a()}.${a()}.${a()}.${a()}`;
   }
+  getDosPkg(url: string): number {
+    const domen = "." + url.split(".")[1];
+    return domains.filter(({ domain }) => domain == domen)[0].dosPkg;
+  }
+  updateUrl(updUrl: string, field: FieldsUrlType, data: unknown): void {
+    fse.writeFileSync(
+      this.pathUrls,
+      JSON.stringify({
+        urls: this.urlObj.urls.map((url) => {
+          if (url.url == updUrl) {
+            // @ts-ignore
+            url[field] = data;
+          }
+          return url;
+        }),
+      })
+    );
+  }
   deleteUrl(delUrl: string): void {
-    if (!fse.existsSync(this.pathUrls)) {
-      fse.createFileSync(this.pathUrls);
-    } else {
-      fse.createFileSync(this.pathUrls);
-    }
     fse.writeFileSync(
       this.pathUrls,
       JSON.stringify({
@@ -36,7 +58,10 @@ export class Urls {
     );
   }
   dropUrls = (): void => {
-    fse.removeSync(this.pathUrls);
+    if (fse.existsSync(this.pathUrls)) {
+      fse.createFileSync(this.pathUrls);
+      fse.removeSync(this.pathUrls);
+    }
   };
   readUrls = (): null | UrlsType[] => {
     if (fse.existsSync(this.pathUrls)) return fse.readJsonSync(this.pathUrls);
@@ -55,7 +80,7 @@ export class Urls {
 
         while (iterationPorts) {
           --iterationPorts;
-          ports.push(Math.floor(Math.random() * 30000));
+          ports.push(Math.floor(Math.random() * 28000) + 2000);
         }
         const random = crypto.generateKeySync("hmac", {
           length: 150 + Math.abs(+(Math.random() * 100).toFixed(0)),
@@ -69,6 +94,8 @@ export class Urls {
             domains[Math.floor(Math.random() * domains.length)].domain,
           ip: this.genIp(),
           ports: ports,
+          attempts: 3,
+          impressibility: false,
         });
       }
       this.urlObj = result;
@@ -78,8 +105,6 @@ export class Urls {
   };
   saveUrls(): void {
     if (!fse.existsSync(this.pathUrls)) {
-      fse.createFileSync(this.pathUrls);
-    } else {
       fse.createFileSync(this.pathUrls);
     }
     fse.writeFileSync(this.pathUrls, JSON.stringify(this.urlObj));
