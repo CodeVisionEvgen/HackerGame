@@ -1,10 +1,18 @@
 import { DarkWebDescription } from "../constants/actionsDesc";
-import { ClearCli, StrictSize, errorMsg, write } from "../utils/textStyles";
+import {
+  ClearCli,
+  LazyText,
+  Loading,
+  StrictSize,
+  errorMsg,
+  write,
+} from "../utils/textStyles";
 import * as Colors from "cli-color";
 import { Player } from "../modules/player";
 import * as mainLine from "readline";
 import { CmdType } from "./hack";
 import { RenderMenu } from "../ui/menu";
+import { domains } from "../constants/hack";
 const middlewares = {
   setPrompt: (line: mainLine.Interface) => {
     line.setPrompt(Colors.bold.green(`Anonymous: `));
@@ -14,10 +22,41 @@ const middlewares = {
 
 const cmds: CmdType = {
   sellDB: {
-    action: () => {},
+    action: async () => {
+      const stats = Player.readStats();
+      const domainsValue = (): any => {
+        return stats.dbs.reduce((acc, curr) => {
+          const dom = `.${curr.split(".")[1]}`;
+          const finded = domains.find(({ domain }) => dom === domain);
+          return (acc += finded.dosPkg / 100);
+        }, 0);
+      };
+      if (!domainsValue()) {
+        errorMsg("You have nothing to sell.\n");
+        return false;
+      }
+      await LazyText(Colors.greenBright(`Finding buyers...\n`), 100);
+      await Loading(200);
+      await LazyText(Colors.greenBright(`Selling dbs...\n`), 50);
+      write(Colors.greenBright(`Dbs has been successfully sold.\n`));
+      write(Colors.greenBright(`You have received $${domainsValue()}.\n`));
+
+      const player = new Player(
+        stats.nick,
+        domainsValue(),
+        stats.laptop,
+        stats.network,
+        undefined,
+        undefined,
+        []
+      );
+      player.save();
+    },
   },
   showProducts: {
-    action: () => {},
+    action: () => {
+      errorMsg("There are no items to buy.\n");
+    },
   },
   exit: {
     action: () => {
@@ -33,7 +72,7 @@ export default {
   action: darkWebInit,
 };
 
-function darkWebInit() {
+async function darkWebInit() {
   ClearCli();
   write(Colors.bgBlack("Print 'exit' for DarkWeb exit\n\n\r"));
   write(
@@ -48,6 +87,8 @@ function darkWebInit() {
       ) + "\n\n"
     )
   );
+  await LazyText(Colors.greenBright(`Connecting to the darknet.\n`), 50);
+  write(Colors.greenBright(`Connect successfyl.\n\n`));
   const line = mainLine.createInterface({
     input: process.stdin,
     output: process.stdout,

@@ -23,7 +23,7 @@ export class Player implements IPlayer {
   pathStats: string;
   constructor(
     nick: string,
-    balance: number,
+    balance: number = 0,
     laptop: string,
     network: string,
     lastHack: LastHackType = {
