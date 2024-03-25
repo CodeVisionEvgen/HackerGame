@@ -1,3 +1,4 @@
+import { laptopType, networkType } from "../actions/Shop";
 import { setNickname } from "../constants/questions";
 import { Answer } from "../utils/textStyles";
 import * as Colors from "cli-color";
@@ -5,18 +6,18 @@ import * as fse from "fs-extra";
 export type LastHackType = { domain: string; code: number; ip: string };
 export interface IPlayer {
   nick: string;
-  laptop: string;
+  laptop: laptopType;
   balance: number;
-  network: string;
+  network: networkType;
   location: string;
   lastHack?: LastHackType;
   dbs: string[];
 }
 export class Player implements IPlayer {
   nick: string;
-  laptop: string;
+  laptop: laptopType;
   balance: number;
-  network: string;
+  network: networkType;
   location: string;
   lastHack?: LastHackType;
   dbs: string[];
@@ -24,8 +25,8 @@ export class Player implements IPlayer {
   constructor(
     nick: string,
     balance: number = 0,
-    laptop: string,
-    network: string,
+    laptop: laptopType,
+    network: networkType,
     lastHack: LastHackType = {
       domain: "none",
       code: NaN,

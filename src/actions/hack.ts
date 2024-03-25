@@ -5,6 +5,7 @@ import * as Colors from "cli-color";
 import { Player } from "../modules/player";
 import { ClearCli, Loading, errorMsg, write } from "../utils/textStyles";
 import { Urls } from "../modules/urls";
+const { laptop, network } = Player.readStats();
 
 export type CmdType = {
   [key: string]: {
@@ -20,7 +21,7 @@ const middlewares = {
   setPrompt: (line: mainLine.Interface) => {
     let player = Player.readStats();
     line.setPrompt(
-      Colors.bold.greenBright(`${player.nick}@${player.laptop}`) +
+      Colors.bold.greenBright(`${player.nick}@${player.laptop.name}`) +
         `:${Colors.bold.blue(`${player.location}`)}$ `
     );
     line.prompt();
@@ -38,7 +39,7 @@ const cmds: CmdType = {
           write(url.url + "\n");
         });
       } else {
-        await Loading(10);
+        await Loading(200 / network.speed);
         Url.genUrls().urls.forEach((url) => {
           write(url.url + "\n");
         });
@@ -46,14 +47,16 @@ const cmds: CmdType = {
     },
   },
   dropUrls: {
+    middleware: middlewares.isDefLocation,
     action: async () => {
       const Url = new Urls();
-      await Loading(5);
+      await Loading(20 / network.speed);
       Url.dropUrls();
       write(`Your droped ${Url.checkSizeUrls()} urls.\n`);
     },
   },
   checker: {
+    middleware: middlewares.isDefLocation,
     action: async (question) => {
       const arg = question.split(" ")[1];
       if (!arg) {
@@ -75,12 +78,16 @@ const cmds: CmdType = {
         return false;
       }
       write(`Request to: ${arg}\n`);
-      await Loading(30);
+      await Loading(240 / network.speed);
       write(
         `Response from: ${arg} save in lastResponse.txt\nTry 'cat lastResponse.txt' to see response.\n`
       );
       const stats = Player.readStats();
-      const code = [200, 401][Math.floor(Math.random() * 2)];
+      const codes = [401, 401, 401, 401];
+      for (let i = 0; i < laptop.chanceOfSuccess; i++) {
+        codes.push(200);
+      }
+      const code = codes[Math.floor(Math.random() * codes.length)];
       const player = new Player(
         stats.nick,
         stats.balance,
@@ -91,8 +98,7 @@ const cmds: CmdType = {
           code,
           ip: (() => {
             if (code === 401) {
-              Url.deleteUrl(arg);
-              return "Checker failed";
+              return "Checker failed, try again!";
             } else {
               return urlIsExist.ip;
             }
@@ -103,6 +109,7 @@ const cmds: CmdType = {
     },
   },
   dos: {
+    middleware: middlewares.isDefLocation,
     action: async (question: string) => {
       const [arg, port] = question.split(" ")[1].split(":");
       if (!arg) {
@@ -133,9 +140,11 @@ const cmds: CmdType = {
       await new Promise(async (res) => {
         let i = 0;
         while (true) {
-          await new Promise((res) => setTimeout(res, 30));
+          await new Promise((res) => setTimeout(res, 1500 / network.speed));
           i++;
-          let pkg = Math.floor(Math.random() * 16000);
+          let pkg = Math.floor(
+            Math.random() * (16000 + 800 * laptop.chanceOfSuccess)
+          );
           packages += pkg;
           write(`Sent ${pkg} packages\n`);
           if (i == 20) break;
@@ -161,6 +170,7 @@ const cmds: CmdType = {
     },
   },
   cat: {
+    middleware: middlewares.isDefLocation,
     action: (question) => {
       const arg = question.split(" ")[1];
       if (!arg) {
@@ -185,9 +195,9 @@ const cmds: CmdType = {
       const stats = Player.readStats();
       if (stats.location !== "~/") {
         write("Start coverTracks\n");
-        await Loading(30);
+        await Loading(90 / laptop.chanceOfSuccess);
         write(`Covering tracks\n`);
-        await Loading(80);
+        await Loading(80 / network.speed);
         write(`Cover-up complete\n`);
         new Player(
           stats.nick,
@@ -209,7 +219,7 @@ const cmds: CmdType = {
       const stats = Player.readStats();
       if (stats.location !== "~/") {
         write("Start download...\n");
-        await Loading(80);
+        await Loading(300 / network.speed);
         write("Download finish\n");
         new Player(
           stats.nick,
@@ -227,6 +237,7 @@ const cmds: CmdType = {
     },
   },
   bruteForce: {
+    middleware: middlewares.isDefLocation,
     action: async (question: string) => {
       const arg = question.split(" ")[1];
       if (!arg) {
@@ -244,7 +255,7 @@ const cmds: CmdType = {
         errorMsg(`Fatal error: ${currentUrl.url} is not impressibility!\n`);
         return false;
       }
-      await Loading(50);
+      await Loading((90 - laptop.chanceOfSuccess) / network.speed);
       const stats = Player.readStats();
       const player = new Player(
         stats.nick,
@@ -258,7 +269,8 @@ const cmds: CmdType = {
     },
   },
   scanPort: {
-    action: (question: string) => {
+    middleware: middlewares.isDefLocation,
+    action: async (question: string) => {
       const arg = question.split(" ")[1];
       if (!arg) {
         errorMsg("Syntax error: scanPort command must have an argument!\n");
@@ -274,6 +286,8 @@ const cmds: CmdType = {
         errorMsg("Fatal error: ip is not exits!\n");
         return false;
       }
+      write(`Starting scaning ports\n`);
+      await Loading((100 - laptop.chanceOfSuccess) / network.speed);
       write(`Open ports: [${url.ports}]\n`);
     },
   },

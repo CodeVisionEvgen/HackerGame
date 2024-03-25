@@ -15,4 +15,4 @@ Syntax: scanPort [website_url]
 Purchase diverse software and guides to expand your list of commands.
 `;
 export const StatsAction = (player: IPlayer) =>
-  `Player's statistics\n\n\rNickname: ${player.nick}\n\rBalance: ${player.balance}$\n\rLaptop: ${player.laptop}\n\rNetwork: ${player.network}\n\r`;
+  `Player's statistics\n\n\rNickname: ${player.nick}\n\rBalance: ${player.balance}$\n\rLaptop: ${player.laptop.name}\n\rNetwork: ${player.network.name}\n\r`;
