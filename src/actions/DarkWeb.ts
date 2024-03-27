@@ -20,6 +20,12 @@ const middlewares = {
   },
 };
 
+type Hacker = {
+  nick: string;
+  balance: number;
+  countHacks: number;
+};
+
 const cmds: CmdType = {
   sellDB: {
     action: async () => {
@@ -53,6 +59,7 @@ const cmds: CmdType = {
       player.save();
     },
   },
+
   showProducts: {
     action: () => {
       errorMsg("There are no items to buy.\n");
@@ -84,9 +91,14 @@ async function darkWebInit() {
     Colors.bgGreenBright.bold(
       StrictSize(
         `Please write the command 'showProducts' to see the available services`
-      ) + "\n\n"
+      ) + "\n"
     )
   );
+  // write(
+  //   Colors.bgGreenBright.bold(
+  //     StrictSize(`Write the command 'top' to see the top hackers`) + "\n\n"
+  //   )
+  // );
   await LazyText(Colors.greenBright(`Connecting to the darknet.\n`), 50);
   write(Colors.greenBright(`Connect successfyl.\n\n`));
   const line = mainLine.createInterface({

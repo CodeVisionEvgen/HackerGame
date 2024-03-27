@@ -152,6 +152,11 @@ const cmds: CmdType = {
         res(true);
       });
       const dosPkg = Url.getDosPkg(url.url);
+      const { successPort } = url;
+      if (successPort !== +port) {
+        write(`Nothing happens, maybe you need to use a different port\n`);
+        return false;
+      }
       if (packages >= dosPkg) {
         Url.updateUrl(url.url, "impressibility", true);
         setTimeout(() => {
@@ -181,11 +186,18 @@ const cmds: CmdType = {
         errorMsg("File does not exist!\n");
         return false;
       }
+      const Url = new Urls().readUrls();
       const stats = Player.readStats();
+      const url = Url.urls.filter(
+        (url) => url.url === stats.lastHack.domain
+      )[0];
       if (!stats.lastHack) {
         write(`File ${arg} is empty.\n`);
       } else {
-        write(JSON.stringify(stats.lastHack) + "\n");
+        write(
+          JSON.stringify({ ...stats.lastHack, possibleAdmin: url.adminNick }) +
+            "\n"
+        );
       }
     },
   },
@@ -218,6 +230,8 @@ const cmds: CmdType = {
     action: async () => {
       const stats = Player.readStats();
       if (stats.location !== "~/") {
+        const url = new Urls();
+        url.deleteUrl(stats.location);
         write("Start download...\n");
         await Loading(300 / network.speed);
         write("Download finish\n");
